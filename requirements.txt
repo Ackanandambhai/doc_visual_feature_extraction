@@ -1,0 +1,30 @@
+# Deep Learning
+torch
+torchvision
+
+# Data Handling
+numpy
+pandas
+
+# Image Processing
+Pillow
+opencv-python
+
+# Data Augmentation
+albumentations
+
+# Machine Learning Metrics
+scikit-learn
+
+# Visualization
+matplotlib
+
+# Progress Bar
+tqdm
+
+# Jupyter Notebook
+jupyter
+ipykernel
+
+# Experiment Tracking
+tensorboard
