@@ -18,6 +18,7 @@ scikit-learn
 
 # Visualization
 matplotlib
+seaborn
 
 # Progress Bar
 tqdm
