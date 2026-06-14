@@ -1,0 +1,2 @@
+Model,Parameters,Train_Accuracy,Val_Accuracy,Test_Accuracy,Precision,Recall,F1_Score,Training_Time
+densenet121,6964106,0.9673,0.8561,0.8561,0.8552,0.8296,0.8387,9839.3

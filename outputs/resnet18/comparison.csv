@@ -1,0 +1,2 @@
+Model,Parameters,Train_Accuracy,Val_Accuracy,Test_Accuracy,Precision,Recall,F1_Score,Training_Time
+resnet18,11181642,0.9364,0.8271,0.8271,0.8283,0.7991,0.8091,3588.9

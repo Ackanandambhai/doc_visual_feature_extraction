@@ -44,23 +44,23 @@ from tqdm import tqdm
 
 NUM_CLASSES   = 10
 INPUT_SIZE    = 224
-EPOCHS        = 30          # override via --epochs
+EPOCHS        = 15          # override via --epochs
 LEARNING_RATE = 1e-4
 SEED          = 42
 
 CLASS_NAMES = ["ADVE", "Email", "Form", "Letter", "Memo",
                "News", "Note", "Report", "Resume", "Scientific"]
 
-# Batch sizes tuned for RTX A4500 (20 GB VRAM)
+# Batch sizes tuned for M1 macbook (8  GB unified RAM wiht MPS)
 # Tobacco3482 is small (~3482 images) so larger batches are fine
 BACKBONE_BATCH = {
-    "resnet18":           64,
-    "resnet50":           32,
-    "mobilenet_v2":       64,
-    "mobilenet_v3_small": 64,
-    "efficientnet_b0":    32,
-    "densenet121":        32,
-    "vgg16":              16,
+    "mobilenet_v3_small": 32,
+    "mobilenet_v2": 32,
+    "resnet18": 32,
+    "resnet50": 16,
+    "efficientnet_b0": 16,
+    "densenet121": 16,
+    "vgg16": 8,
 }
 
 logging.basicConfig(
@@ -407,9 +407,28 @@ def train_backbone(
         optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-        history      = {"train_loss":[], "val_loss":[], "train_acc":[], "val_acc":[]}
+        # Early stopping configuration
+        # We monitor validation loss instead of validation accuracy
+        # because it is generally a more stable convergence signal.patience=3:
+        # Stop training if validation loss does not improve for 3 consecutive epochs.
+
+        history = {
+            "train_loss": [],
+            "val_loss": [],
+            "train_acc": [],
+            "val_acc": [],
+        }
+
         best_val_acc = 0.0
-        best_ckpt    = out_dir / "checkpoints" / f"{name}_fold{fold}_best.pth"
+        best_val_loss = float("inf")
+
+        # Number of consecutive epochs without improvement.
+        epochs_without_improvement = 0
+
+        # Maximum tolerated epochs without improvement.
+        EARLY_STOPPING_PATIENCE = 3
+
+        best_ckpt = out_dir / "checkpoints" / f"{name}_fold{fold}_best.pth"
 
         # for ep in range(1, epochs + 1):
         #     t_loss, t_acc = run_epoch(model, train_loader, criterion, optimizer, device, True)
@@ -453,9 +472,32 @@ def train_backbone(
                 ep, epochs, t_loss, v_loss, t_acc, v_acc
             )
 
-            if v_acc > best_val_acc:
+            # Save checkpoint only when validation loss improves.
+            if v_loss < best_val_loss:
+
+                best_val_loss = v_loss
                 best_val_acc = v_acc
+
+                epochs_without_improvement = 0
+
                 torch.save(model.state_dict(), best_ckpt)
+
+            else:
+
+                epochs_without_improvement += 1
+
+            # Early stopping: terminate fold training when validation loss has not
+            # improved for PATIENCE consecutive epochs.
+            if epochs_without_improvement >= EARLY_STOPPING_PATIENCE:
+
+                log.info(
+                    "Early stopping triggered at epoch %d "
+                    "(best validation loss = %.4f)",
+                    ep,
+                    best_val_loss,
+                )
+
+                break
 
         fold_train_accs.append(history["train_acc"][-1])
         fold_val_accs.append(best_val_acc)

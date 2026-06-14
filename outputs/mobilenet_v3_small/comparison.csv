@@ -1,0 +1,2 @@
+Model,Parameters,Train_Accuracy,Val_Accuracy,Test_Accuracy,Precision,Recall,F1_Score,Training_Time
+mobilenet_v3_small,1528106,0.8356,0.7685,0.7685,0.7826,0.7415,0.7543,4759.3
