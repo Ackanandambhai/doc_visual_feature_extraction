@@ -1,33 +1,34 @@
 # Document Visual Feature Extraction
 
-A deep learning framework for document image classification using multiple CNN backbones on the Tobacco3482 dataset. The repository provides automated training, evaluation, k-fold cross-validation, performance comparison, confusion matrices, and report generation across several state-of-the-art architectures.
-
-## Supported Backbones
-
-- MobileNetV3-Small
-- MobileNetV2
-- ResNet18
-- ResNet50
-- EfficientNet-B0
-- DenseNet121
-- VGG16
+A deep learning framework for **feature extraction** and  **document image classification** using multiple CNN backbones on the **Tobacco3482** dataset. The project supports automated training, k-fold cross-validation, evaluation, model comparison, confusion matrices, and visualization of results across several state-of-the-art architectures.
 
 ---
 
-## Project Structure
+# Supported Backbones
+
+* MobileNetV3-Small
+* MobileNetV2
+* ResNet18
+* ResNet50
+* EfficientNet-B0
+* DenseNet121
+* VGG16
+
+---
+
+# Project Structure
 
 ```text
 doc_visual_feature_extraction/
+│
+├── .gitignore
+├── README.md
+├── requirements.txt
 │
 ├── data/
 │   └── raw/
 │       └── Tobacco3482/
 │
-├── scripts/
-│   └── run_experiment.sh
-│
-├── src/
-│   ├── main.py
 ├── outputs/
 │   ├── mobilenet_v3_small/
 │   ├── mobilenet_v2/
@@ -37,47 +38,26 @@ doc_visual_feature_extraction/
 │   ├── densenet121/
 │   └── vgg16/
 │
-└── README.md
+├── plots/
+│   ├── combined_model_comparison.csv
+│   ├── test_accuracy_comparison.png
+│   ├── f1_score_comparison.png
+│   ├── parameter_comparison.png
+│   ├── training_time_comparison.png
+│   ├── accuracy_vs_parameters.png
+│   └── accuracy_vs_training_time.png
+│
+├── scripts/
+│   └── run_experiment.sh
+│
+└── src/
+    ├── main.py
+    └── plot_results.py
 ```
 
 ---
 
-## Run All Backbones
-
-```bash
-bash scripts/run_experiment.sh
-```
-
----
-
-## Run a Specific Backbone
-
-### VGG16
-
-```bash
-caffeinate -dimsu bash scripts/run_experiment.sh \
-    --backbones vgg16
-```
-
-### ResNet50
-
-```bash
-caffeinate -dimsu bash scripts/run_experiment.sh \
-    --backbones resnet50
-```
-
-### DenseNet121
-
-```bash
-caffeinate -dimsu bash scripts/run_experiment.sh \
-    --backbones densenet121
-```
-
-> macOS users can use `caffeinate -dimsu` to prevent sleep during long training runs.
-
----
-
-## Dataset
+# Dataset
 
 Place the Tobacco3482 dataset in:
 
@@ -85,21 +65,103 @@ Place the Tobacco3482 dataset in:
 data/raw/Tobacco3482/
 ```
 
----
+Dataset source:
 
-## Generated Outputs
-
-- Cross-validation results
-- Classification reports
-- Confusion matrices
-- Training and validation curves
-- Accuracy, Precision, Recall and F1-score metrics
-- Model comparison plots
-- Performance summaries
+https://www.kaggle.com/datasets/patrickaudriaz/tobacco3482jpg
 
 ---
 
-## Training Pipeline
+# Running Experiments
+
+## Train all supported backbones and generate comparison plots
+
+```bash
+bash scripts/run_experiment.sh
+```
+
+## Train all supported backbones only
+
+```bash
+bash scripts/run_experiment.sh --train-only
+```
+
+## Generate comparison plots only
+
+```bash
+bash scripts/run_experiment.sh --plot-only
+```
+
+## Train selected backbones and generate plots
+
+```bash
+bash scripts/run_experiment.sh \
+    --backbones resnet18 mobilenet_v2 \
+    --epochs 15 \
+    --folds 3
+```
+
+## Train a single backbone
+
+### VGG16
+
+```bash
+bash scripts/run_experiment.sh --backbones vgg16
+```
+
+### ResNet50
+
+```bash
+bash scripts/run_experiment.sh --backbones resnet50
+```
+
+### DenseNet121
+
+```bash
+bash scripts/run_experiment.sh --backbones densenet121
+```
+
+> **Note (macOS):** You may optionally prefix commands with `caffeinate -dimsu` to prevent the system from sleeping during long-running experiments.
+
+---
+
+# Generated Outputs
+
+## Model-specific outputs
+
+Each trained backbone stores its results under:
+
+```text
+outputs/<model_name>/
+```
+
+Typical files include:
+
+* `comparison.csv`
+* `best_model.pth`
+* `confusion_matrix.png`
+* Training history and other evaluation artifacts
+
+## Comparison plots
+
+Running `src/plot_results.py` (or `bash scripts/run_experiment.sh`) automatically generates comparison results in:
+
+```text
+plots/
+```
+
+Example outputs:
+
+* `combined_model_comparison.csv`
+* `test_accuracy_comparison.png`
+* `f1_score_comparison.png`
+* `parameter_comparison.png`
+* `training_time_comparison.png`
+* `accuracy_vs_parameters.png`
+* `accuracy_vs_training_time.png`
+
+---
+
+# Training Pipeline
 
 ```text
 Input Document Images
@@ -123,17 +185,32 @@ Validation & Testing
 Performance Evaluation
           │
           ▼
-Reports, Plots & Confusion Matrices
+outputs/<model>/comparison.csv
+          │
+          ▼
+src/plot_results.py
+          │
+          ▼
+plots/
 ```
 
-## Model Performance Summary
+---
 
-| Model | Parameters | Train Accuracy | Test Accuracy | Precision | Recall | F1 Score |
-|---------|-----------:|---------------:|--------------:|----------:|-------:|---------:|
-| densenet121 | 6,964,106 | 0.9673 | 0.8561 | 0.8552 | 0.8296 | 0.8387 |
-| efficientnet_b0 | 4,020,358 | 0.8916 | 0.8372 | 0.8294 | 0.8218 | 0.8242 |
-| mobilenet_v2 | 2,236,682 | 0.9370 | 0.8409 | 0.8405 | 0.8175 | 0.8255 |
-| mobilenet_v3_small | 1,528,106 | 0.8356 | 0.7685 | 0.7826 | 0.7415 | 0.7543 |
-| resnet18 | 11,181,642 | 0.9364 | 0.8271 | 0.8283 | 0.7991 | 0.8091 |
-| resnet50 | 23,528,522 | 0.9749 | 0.8667 | 0.8590 | 0.8460 | 0.8513 |
-| vgg16 | 134,301,514 | 0.9321 | 0.8277 | 0.8209 | 0.7935 | 0.8036 |
+# Model Performance Summary
+
+After experiments complete, the consolidated metrics for all available models are stored in:
+
+```text
+plots/combined_model_comparison.csv
+```
+
+The generated visualizations provide comparisons of:
+
+* Test Accuracy
+* F1 Score
+* Parameter Count
+* Training Time
+* Accuracy vs. Parameters
+* Accuracy vs. Training Time
+
+These plots are automatically created from the `comparison.csv` files generated for each trained backbone.
