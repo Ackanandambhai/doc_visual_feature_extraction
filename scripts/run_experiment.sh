@@ -61,7 +61,7 @@ do
     echo "Training $MODEL"
     echo "=================================================="
 
-    python src/train.py \
+    python src/main.py \
         --dataset_root "$DATASET_ROOT" \
         --out_dir "$OUT_DIR/$MODEL" \
         --epochs "$EPOCHS" \
