@@ -4,6 +4,10 @@ A deep learning framework for **feature extraction** and  **document image cla
 
 ---
 
+## Project Architecture
+
+<img width="1600" height="956" alt="dvfe_architecture" src="https://github.com/user-attachments/assets/4b238950-6e44-45c7-a87d-273b78739664" />
+
 # Supported Backbones
 
 * MobileNetV3-Small
