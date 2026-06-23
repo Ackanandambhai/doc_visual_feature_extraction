@@ -6,7 +6,8 @@ A deep learning framework for **feature extraction** and  **document image cla
 
 ## Project Architecture
 
-<img width="1600" height="956" alt="dvfe_architecture" src="https://github.com/user-attachments/assets/4b238950-6e44-45c7-a87d-273b78739664" />
+<img width="1122" height="1402" alt="image" src="https://github.com/user-attachments/assets/efbd0e81-4ccc-4892-bd90-e2acc3b81e25" />
+
 
 # Supported Backbones
 
