@@ -169,37 +169,215 @@ Example outputs:
 # Training Pipeline
 
 ```text
-Input Document Images
+Tobacco3482 Dataset
+(ADVE, Email, Form, Letter, Memo,
+ News, Note, Report, Resume, Scientific)
           │
           ▼
-Data Loading & Preprocessing
+Dataset Loading
+(Tobacco3482Dataset)
           │
           ▼
-K-Fold Cross Validation
+Extract Class Labels
+(get_labels())
           │
           ▼
-Backbone Selection
+Stratified K-Fold Cross Validation
           │
-          ▼
-Model Training
-          │
-          ▼
-Validation & Testing
-          │
-          ▼
-Performance Evaluation
-          │
-          ▼
-outputs/<model>/comparison.csv
-          │
-          ▼
-src/plot_results.py
-          │
-          ▼
-plots/
+          ├───────────────────────┐
+          │                       │
+          ▼                       ▼
+     Train Split           Validation Split
+          │                       │
+          ▼                       ▼
+ Train Transforms         Validation Transforms
+ Resize(256)              Resize(224)
+ RandomCrop(224)          ToTensor()
+ RandomHorizontalFlip()   Normalize()
+ RandomRotation(5°)
+ ColorJitter()
+ ToTensor()
+ Normalize()
+          │                       │
+          └───────────┬───────────┘
+                      │
+                      ▼
+              DataLoaders
+         (Batching & Shuffling)
+                      │
+                      ▼
+             Backbone Selection
+      (ResNet18, ResNet50, VGG16,
+       DenseNet121, EfficientNet-B0,
+       MobileNetV2, MobileNetV3-Small)
+                      │
+                      ▼
+         Replace Final Classification Layer
+                (Linear → 10 Classes)
+                      │
+                      ▼
+               Training Loop
+                 (Per Epoch)
+                      │
+                      ▼
+                Forward Pass
+                      │
+                      ▼
+             CrossEntropy Loss
+                      │
+                      ▼
+                Backward Pass
+                      │
+                      ▼
+            Adam Optimizer Update
+                      │
+                      ▼
+              Validation Phase
+          (Loss & Accuracy Computation)
+                      │
+                      ▼
+               Early Stopping
+      (Monitor Validation Loss)
+                      │
+                      ▼
+            Save Best Checkpoint
+          (*.pth per fold)
+                      │
+                      ▼
+          Evaluate Best Fold Model
+                      │
+                      ▼
+          Aggregate Predictions
+            Across All Folds
+                      │
+                      ▼
+           Performance Evaluation
+      Accuracy, Precision, Recall,
+      F1-Score, Confusion Matrix,
+      Classification Report
+                      │
+                      ▼
+           outputs/<model_name>/
+                      │
+          ├── checkpoints/
+          ├── plots/
+          ├── confusion_matrices/
+          └── reports/
+                      │
+                      ▼
+              comparison.csv
+                      │
+                      ▼
+            src/plot_results.py
+                      │
+                      ▼
+          Comparison Visualizations
+      cmp_test_acc.png
+      cmp_f1.png
+      cmp_time.png
+      cmp_params.png
 ```
 
----
+# Training and Validation Flow :
+
+```
+Training Loop
+(For Epoch = 1 ... N)
+          │
+          ▼
+────────────────────────────────
+Training Phase
+────────────────────────────────
+          │
+          ▼
+For Each Training Batch
+          │
+          ▼
+Input Images + Labels
+          │
+          ▼
+CNN Backbone Forward Pass
+(outputs = model(imgs))
+          │
+          ▼
+CrossEntropy Loss
+(loss = criterion(outputs, labels))
+          │
+          ▼
+Gradient Computation
+(loss.backward())
+          │
+          ▼
+Adam Parameter Update
+(optimizer.step())
+          │
+          ▼
+Update Running Loss & Accuracy
+          │
+          ▼
+Repeat Until All Training Batches Complete
+          │
+          ▼
+Training Epoch Metrics
+(train_loss, train_acc)
+          │
+          ▼
+────────────────────────────────
+Validation Phase
+────────────────────────────────
+          │
+          ▼
+For Each Validation Batch
+          │
+          ▼
+Forward Pass Only
+(torch.no_grad())
+          │
+          ▼
+Compute Validation Loss
+          │
+          ▼
+Compute Validation Accuracy
+          │
+          ▼
+Repeat Until All Validation Batches Complete
+          │
+          ▼
+Validation Epoch Metrics
+(val_loss, val_acc)
+          │
+          ▼
+Learning Rate Scheduler Step
+(CosineAnnealingLR)
+          │
+          ▼
+Best Model Check
+          │
+     ┌────┴────┐
+     │         │
+     ▼         ▼
+Improved?     Not Improved?
+     │         │
+     ▼         ▼
+Save .pth     Increase Counter
+Checkpoint
+     │         │
+     └────┬────┘
+          │
+          ▼
+Early Stopping Check
+          │
+     ┌────┴────┐
+     │         │
+     ▼         ▼
+Patience      Patience
+Exceeded?      Not Exceeded?
+     │         │
+     ▼         ▼
+Stop Fold    Next Epoch
+Training
+```
+---  
 
 # Model Performance Summary
 
